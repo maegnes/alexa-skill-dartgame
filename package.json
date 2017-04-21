@@ -1,0 +1,31 @@
+{
+  "name": "alexa-skill-dartgame",
+  "version": "0.0.1",
+  "description": "alexa skill to control dartgames",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/maegnes/alexa-skill-dartgame.git"
+  },
+  "keywords": [
+    "alexa",
+    "skill",
+    "dart",
+    "game",
+    "501",
+    "401",
+    "301"
+  ],
+  "author": "Magnus Buk <MagnusBuk@gmx.de>",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/maegnes/alexa-skill-dartgame/issues"
+  },
+  "homepage": "https://github.com/maegnes/alexa-skill-dartgame#readme",
+  "dependencies": {
+    "aws-sdk": "^2.44.0"
+  }
+}
