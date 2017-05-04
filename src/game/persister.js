@@ -1,5 +1,6 @@
 const AWS = require('aws-sdk');
 const tableName = "Game";
+const GameModel = require('./model.js');
 
 AWS.config.update({
     region:'eu-west-1',
@@ -33,7 +34,10 @@ GamePersister = class GamePersister {
                 Item: {
                     sessionId: sessionId,
                     players: [],
-                    state: 'CREATED'
+                    state: 'CREATED',
+                    message: null,
+                    currentPlayer: null,
+                    currentThrows: 0
                 }
             },
             function(err, data) {
@@ -41,7 +45,7 @@ GamePersister = class GamePersister {
                     console.log(err);
                     //throw new Error('The game could not be created!');
                 } else {
-                    createCallback(data);
+                    createCallback(new GameModel(data));
                 }
             });
     }
@@ -62,7 +66,7 @@ GamePersister = class GamePersister {
             if (err) {
                 throw new Error('Could not retreive game!');
             } else {
-                callback(data.Item);
+                callback(new GameModel(data.Item));
             }
         })
     }
@@ -74,6 +78,9 @@ GamePersister = class GamePersister {
      * @param updateCallback
      */
     update(game, updateCallback) {
+        if ('GameModel' === game.constructor.name) {
+            game = game.getItem();
+        }
         this.docClient.put(
             {
                 TableName: tableName,
@@ -83,7 +90,8 @@ GamePersister = class GamePersister {
                 if (err) {
                     console.log(err)
                 } else {
-                    updateCallback(game);
+                    let model = new GameModel(game);
+                    updateCallback(model);
                 }
             }
         );
