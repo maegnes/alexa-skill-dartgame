@@ -26,6 +26,9 @@
   },
   "homepage": "https://github.com/maegnes/alexa-skill-dartgame#readme",
   "dependencies": {
-    "aws-sdk": "^2.44.0"
+    "alexa-sdk": "^1.0.9",
+    "aws-sdk": "^2.44.0",
+    "body-parser": "^1.17.1",
+    "express": "^4.15.2"
   }
 }
