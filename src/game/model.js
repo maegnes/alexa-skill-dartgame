@@ -122,6 +122,15 @@ GameModel = class GameModel {
         this.item.currentThrows = 0;
     }
 
+    /**
+     * Set the game type (301, 401 etc.)
+     *
+     * @param gameType integer
+     */
+    setType(gameType) {
+        this.item.gameType = gameType;
+    }
+
 };
 
 module.exports = GameModel;

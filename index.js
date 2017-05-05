@@ -37,13 +37,14 @@ app.post('/', function(req, res) {
 
     // Delegate the request to the Alexa SDK and the declared intent-handlers
     const alexa = Alexa.handler(req.body, context);
-    alexa.registerHandlers(newSessionHandlers, startGameHandlers, GameModeHandlers);
+    alexa.registerHandlers(newSessionHandlers, startGameHandlers, GameModeHandlers, EndModeHandlers);
     alexa.execute();
 });
 
 const states = {
-    STARTMODE: '_STARTMODE',    // Set game type, player amounts and player names
-    GAMEMODE: '_GAMEMODE'       // Gamemode - users are playing
+    STARTMODE: '_STARTMODE',      // Set game type, player amounts and player names
+    GAMEMODE: '_GAMEMODE',       // Gamemode - users are playing
+    ENDMODE: '_ENDMODE'         // Game finished
 };
 
 const newSessionHandlers = {
@@ -175,8 +176,6 @@ const GameModeHandlers = Alexa.CreateStateHandler(states.GAMEMODE, {
 
             eventEmitter.emit('SCORE', score, game);
 
-            console.log(game.getItem());
-
             if (game.getMessage() !== null) {
                 response = game.getMessage();
                 game.setMessage(null);
@@ -189,6 +188,11 @@ const GameModeHandlers = Alexa.CreateStateHandler(states.GAMEMODE, {
                     obj.emit(':ask', 'Nächster Pfeil');
                 }
             });
+
+            if (game.getState() === game.STATE_FINISHED) {
+                obj.handler.state = states.ENDMODE;
+            }
+
         });
     },
 
@@ -219,6 +223,28 @@ const GameModeHandlers = Alexa.CreateStateHandler(states.GAMEMODE, {
         this.emit(':ask', 'Dieses Kommando verstehe ich während einem laufenden Spiel leider nicht!');
     }
 
+});
+
+const EndModeHandlers = Alexa.CreateStateHandler(states.ENDMODE, {
+    'AMAZON.YesIntent': function() {
+        let obj = this;
+        gamePersister.read(this.event.session.sessionId, function(game) {
+            eventEmitter.emit('RESTART_GAME', game);
+            gamePersister.update(game, function(game) {
+                obj.handler.state = states.GAMEMODE;
+                obj.emit(':ask', 'Spiel neu gestartet. ' + game.getCurrentPlayer().name + ' ist an der Reihe');
+            });
+        });
+    },
+    'AMAZON.NoIntent': function() {
+        this.emit(':tell', "Alles klar, bis zum nächsten Mal!");
+    },
+    'AMAZON.StopIntent': function() {
+        this.emit(':tell', "Alles klar, bis zum nächsten Mal!");
+    },
+    'AMAZON.CancelIntent': function() {
+        this.emit(':tell', "Alles klar, bis zum nächsten Mal!");
+    }
 });
 
 /**

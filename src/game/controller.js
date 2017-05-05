@@ -14,24 +14,29 @@ game = class game {
 
         // Set the game type to the matched game type (301, 401, 501)
         this.eventEmitter.on('SET_GAME_TYPE', function(type, game) {
-            game = game.getItem();
-            game.gameType = type;
+            game.setType(type);
         });
 
         // Add the players (without names yet)
         this.eventEmitter.on('ADD_PLAYERS', function(playerAmount, game) {
-
-            game = game.getItem();
-
             for(let i = 0; i < playerAmount; i++) {
-                game.players.push(
+                game.getItem().players.push(
                     {
                         "name": null,
-                        "score": game.gameType,
-                        "throws": []
+                        "score": game.getItem().gameType,
+                        "throws": [],
+                        "legs": 0
                     }
                 );
             }
+        });
+
+        this.eventEmitter.on('RESTART_GAME', function(game) {
+            game.getPlayers().forEach(function(player) {
+                player.throws = [];
+                player.score = game.getItem().gameType;
+            });
+            game.start();
         });
 
         this.eventEmitter.on('SET_PLAYER_NAME', function(playerName, game) {
@@ -63,6 +68,7 @@ game = class game {
 
         // Stop game
         this.eventEmitter.on('STOP_GAME', function(game) {
+            game.getCurrentPlayer().legs++;
             game.stop();
         });
 
@@ -81,10 +87,13 @@ game = class game {
                 }
 
                 currentPlayer.score -= score;
+                currentPlayer.throws.push(score);
+
+                console.log(currentPlayer);
 
                 if (0 === currentPlayer.score) {
                     obj.eventEmitter.emit('STOP_GAME', game);
-                    game.setMessage('Spiel beendet. ' + game.getCurrentPlayer().name + ' ist der Gewinner.');
+                    game.setMessage('Spiel beendet. ' + game.getCurrentPlayer().name + ' ist der Gewinner. Neues Leg starten? Antworte mit Ja oder Nein.');
                 } else {
                     game.increaseCurrentThrows();
                     if (3 === game.getCurrentThrows()) {

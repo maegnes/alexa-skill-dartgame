@@ -84,6 +84,9 @@ GamePersister = class GamePersister {
         this.docClient.put(
             {
                 TableName: tableName,
+                Key: {
+                    sessionId: game.sessionId
+                },
                 Item: game,
             },
             function(err, updatedGame) {
